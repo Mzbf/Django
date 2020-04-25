@@ -13,11 +13,14 @@ class UserProfileManager(BaseUserManager):
         """Crée un nouveau user"""
         if not email:
             raise ValueError('Un User doit avoir un email')
+        if not name:
+            raise ValueError('Un nom est obligatoire')
         email=self.normalize_email(email)
         user=self.model(email=email,name=name)
 
         user.set_password(password)
 
+      
         user.save(usinf=self._db)
 
         return user
@@ -26,7 +29,8 @@ class UserProfileManager(BaseUserManager):
 
         user=self.create_user(email,name, password)
         
-        user.is_superuser= True 
+        user.is_superuser=True
+        user.is_staff=True
         user.save(using=self._db)
 
         return user
@@ -35,15 +39,14 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     """Notre modèle pour les utilsateurs du système"""
 
     email = models.EmailField(max_length=254, unique=True)
-    name=models.CharField(max_length=50)
+    name=models.CharField(max_length=50,unique=True)
     is_activate=models.BooleanField(default=True)
-    is_staff=models.BooleanField(default=False)
-
-
-    objects = UserProfileManager()
+    is_staff=models.BooleanField(default=False)    
 
     USERNAME_FIELD = 'email'
     REQUIRED_FILEDS= ['name']
+
+    objects = UserProfileManager()
 
     def get_full_name(self):
         """Renvoi le nom complet de l'utilisateur"""
